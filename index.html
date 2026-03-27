@@ -810,6 +810,8 @@
         <div class="rate-badge">USD/TWD <span id="rateUsdTwd">--</span></div>
         <div class="rate-badge">BTC <span id="rateBtc">--</span></div>
         <div class="rate-badge">ETH <span id="rateEth">--</span></div>
+        <div class="rate-badge">ADA <span id="rateAda">--</span></div>
+        <div class="rate-badge">USDT <span id="rateUsdt">--</span></div>
     </div>
 
     <!-- Main View -->
@@ -1339,6 +1341,12 @@
             
             const ethPrice = state.cryptoPrices.ethereum;
             document.getElementById('rateEth').textContent = ethPrice ? formatCompact(ethPrice) : '--';
+            
+            const adaPrice = state.cryptoPrices.cardano;
+            document.getElementById('rateAda').textContent = adaPrice ? `$${adaPrice.toFixed(3)}` : '--';
+            
+            const usdtPrice = state.cryptoPrices.tether;
+            document.getElementById('rateUsdt').textContent = usdtPrice ? `$${usdtPrice.toFixed(3)}` : '--';
         }
 
         // Fetch all prices
@@ -1360,10 +1368,12 @@
         // Fetch common crypto for badges
         async function fetchCommonCryptoPrices() {
             try {
-                const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd');
+                const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,cardano,tether&vs_currencies=usd');
                 const data = await response.json();
                 if (data.bitcoin) state.cryptoPrices.bitcoin = data.bitcoin.usd;
                 if (data.ethereum) state.cryptoPrices.ethereum = data.ethereum.usd;
+                if (data.cardano) state.cryptoPrices.cardano = data.cardano.usd;
+                if (data.tether) state.cryptoPrices.tether = data.tether.usd;
                 updateRateBadges();
             } catch (err) {
                 console.error('Failed to fetch common crypto:', err);
