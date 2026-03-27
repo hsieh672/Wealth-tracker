@@ -1,0 +1,1887 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Wealth">
+    <meta name="theme-color" content="#000000">
+    <title>Wealth Tracker</title>
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%23000' width='100' height='100' rx='20'/><text x='50' y='62' text-anchor='middle' font-size='40' fill='%23fff'>💰</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #000000;
+            --bg-secondary: #0a0a0a;
+            --bg-card: #111111;
+            --bg-card-hover: #1a1a1a;
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255,255,255,0.6);
+            --text-tertiary: rgba(255,255,255,0.35);
+            --accent-green: #34c759;
+            --accent-red: #ff3b30;
+            --accent-blue: #007aff;
+            --accent-orange: #ff9500;
+            --accent-purple: #af52de;
+            --accent-cyan: #32ade6;
+            --border-color: rgba(255,255,255,0.08);
+            --safe-area-top: env(safe-area-inset-top, 20px);
+            --safe-area-bottom: env(safe-area-inset-bottom, 20px);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            padding-top: var(--safe-area-top);
+            padding-bottom: calc(var(--safe-area-bottom) + 80px);
+        }
+
+        .header {
+            padding: 16px 20px 8px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: linear-gradient(to bottom, var(--bg-primary) 60%, transparent);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .icon-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--bg-card);
+            border: none;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .icon-btn:active {
+            transform: scale(0.92);
+            background: var(--bg-card-hover);
+        }
+
+        .icon-btn.loading svg {
+            animation: spin 1s linear infinite;
+        }
+
+        /* Exchange Rate Badge */
+        .exchange-rates {
+            display: flex;
+            gap: 8px;
+            padding: 0 20px 12px;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+
+        .exchange-rates::-webkit-scrollbar {
+            display: none;
+        }
+
+        .rate-badge {
+            flex-shrink: 0;
+            padding: 6px 12px;
+            background: var(--bg-card);
+            border-radius: 8px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+        }
+
+        .rate-badge span {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-primary);
+            margin-left: 4px;
+        }
+
+        /* Net Worth Section */
+        .net-worth {
+            padding: 20px 20px 30px;
+            text-align: center;
+        }
+
+        .net-worth-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 8px;
+        }
+
+        .net-worth-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 42px;
+            font-weight: 500;
+            letter-spacing: -1px;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.7) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .net-worth-change {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .net-worth-change.positive {
+            background: rgba(52, 199, 89, 0.15);
+            color: var(--accent-green);
+        }
+
+        .net-worth-change.negative {
+            background: rgba(255, 59, 48, 0.15);
+            color: var(--accent-red);
+        }
+
+        /* Category Tabs */
+        .category-tabs {
+            display: flex;
+            gap: 8px;
+            padding: 0 20px 16px;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+
+        .category-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .category-tab {
+            flex-shrink: 0;
+            padding: 10px 18px;
+            border-radius: 24px;
+            border: none;
+            background: var(--bg-card);
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .category-tab.active {
+            background: var(--text-primary);
+            color: var(--bg-primary);
+        }
+
+        .category-tab:active {
+            transform: scale(0.96);
+        }
+
+        /* Assets List */
+        .assets-section {
+            padding: 0 16px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 4px 12px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .section-total {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 15px;
+            color: var(--text-secondary);
+        }
+
+        .asset-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid var(--border-color);
+        }
+
+        .asset-card:active {
+            transform: scale(0.98);
+            background: var(--bg-card-hover);
+        }
+
+        .asset-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .asset-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .asset-icon.cash { background: linear-gradient(135deg, #34c759 0%, #30d158 100%); }
+        .asset-icon.stock-us { background: linear-gradient(135deg, #007aff 0%, #0a84ff 100%); }
+        .asset-icon.stock-tw { background: linear-gradient(135deg, #ff9500 0%, #ffb340 100%); }
+        .asset-icon.crypto { background: linear-gradient(135deg, #af52de 0%, #bf5af2 100%); }
+
+        .asset-info h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+
+        .asset-info p {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .asset-right {
+            text-align: right;
+        }
+
+        .asset-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 3px;
+        }
+
+        .asset-original {
+            font-size: 12px;
+            color: var(--text-tertiary);
+            margin-bottom: 2px;
+        }
+
+        .asset-change {
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .asset-change.positive { color: var(--accent-green); }
+        .asset-change.negative { color: var(--accent-red); }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-tertiary);
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-state p {
+            font-size: 15px;
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: calc(70px + var(--safe-area-bottom));
+            padding-bottom: var(--safe-area-bottom);
+            background: rgba(10, 10, 10, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-start;
+            padding-top: 10px;
+            z-index: 1000;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            background: none;
+            border: none;
+            color: var(--text-tertiary);
+            cursor: pointer;
+            padding: 8px 16px;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .nav-item.active {
+            color: var(--text-primary);
+        }
+
+        .nav-item svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .nav-item span {
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .nav-item.add-btn {
+            background: var(--accent-blue);
+            color: white;
+            border-radius: 50%;
+            width: 52px;
+            height: 52px;
+            margin-top: -20px;
+            box-shadow: 0 4px 20px rgba(0, 122, 255, 0.4);
+        }
+
+        .nav-item.add-btn span {
+            display: none;
+        }
+
+        .nav-item.add-btn svg {
+            width: 28px;
+            height: 28px;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--bg-secondary);
+            border-radius: 24px 24px 0 0;
+            padding: 20px;
+            padding-bottom: calc(20px + var(--safe-area-bottom));
+            z-index: 2001;
+            transform: translateY(100%);
+            transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal.active {
+            transform: translateY(0);
+        }
+
+        .modal-handle {
+            width: 36px;
+            height: 5px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 3px;
+            margin: 0 auto 20px;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--bg-card);
+            border: none;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 16px;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .form-input:focus {
+            border-color: var(--accent-blue);
+        }
+
+        .form-input::placeholder {
+            color: var(--text-tertiary);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 100px;
+            gap: 10px;
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 14px 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 16px;
+            font-family: inherit;
+            outline: none;
+            appearance: none;
+            cursor: pointer;
+        }
+
+        .type-selector {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .type-option {
+            padding: 14px;
+            background: var(--bg-card);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .type-option:active {
+            transform: scale(0.98);
+        }
+
+        .type-option.selected {
+            border-color: var(--accent-blue);
+            background: rgba(0, 122, 255, 0.1);
+        }
+
+        .type-option-icon {
+            font-size: 24px;
+            margin-bottom: 6px;
+        }
+
+        .type-option-label {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            background: var(--accent-blue);
+            border: none;
+            border-radius: 14px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .submit-btn:active {
+            transform: scale(0.98);
+            opacity: 0.9;
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .delete-btn {
+            width: 100%;
+            padding: 16px;
+            background: transparent;
+            border: none;
+            color: var(--accent-red);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+            font-family: inherit;
+        }
+
+        /* Allocation Section */
+        .allocation-section {
+            padding: 0 16px 20px;
+        }
+
+        .allocation-container {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+        }
+
+        .allocation-header {
+            margin-bottom: 20px;
+        }
+
+        .allocation-title {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .allocation-bar {
+            height: 12px;
+            border-radius: 6px;
+            display: flex;
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+
+        .allocation-segment {
+            height: 100%;
+            transition: width 0.5s ease;
+        }
+
+        .allocation-segment.cash { background: var(--accent-green); }
+        .allocation-segment.stock-us { background: var(--accent-blue); }
+        .allocation-segment.stock-tw { background: var(--accent-orange); }
+        .allocation-segment.crypto { background: var(--accent-purple); }
+
+        .allocation-legend {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .legend-dot.cash { background: var(--accent-green); }
+        .legend-dot.stock-us { background: var(--accent-blue); }
+        .legend-dot.stock-tw { background: var(--accent-orange); }
+        .legend-dot.crypto { background: var(--accent-purple); }
+
+        .legend-info {
+            flex: 1;
+        }
+
+        .legend-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .legend-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        /* Stats View */
+        .stats-view, .settings-view {
+            display: none;
+            padding: 20px 16px;
+        }
+
+        .stats-view.active, .settings-view.active {
+            display: block;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 28px;
+            font-weight: 500;
+        }
+
+        /* Settings */
+        .settings-item {
+            background: var(--bg-card);
+            border-radius: 14px;
+            padding: 16px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+        }
+
+        .settings-item-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .settings-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: var(--bg-card-hover);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .settings-label {
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        .settings-value {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            top: calc(var(--safe-area-top) + 20px);
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            background: var(--bg-card);
+            padding: 14px 24px;
+            border-radius: 14px;
+            font-size: 14px;
+            font-weight: 500;
+            z-index: 3000;
+            opacity: 0;
+            transition: all 0.3s;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            border: 1px solid var(--border-color);
+        }
+
+        .toast.active {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .asset-card {
+            animation: fadeIn 0.3s ease forwards;
+        }
+
+        /* View transitions */
+        .view {
+            display: none;
+        }
+
+        .view.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-top">
+            <h1>Wealth</h1>
+            <div class="header-actions">
+                <button class="icon-btn" id="refreshBtn" title="Refresh prices">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 12a9 9 0 11-3-6.7"/>
+                        <path d="M21 3v6h-6"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Exchange Rates -->
+    <div class="exchange-rates" id="exchangeRates">
+        <div class="rate-badge">USD/TWD <span id="rateUsdTwd">--</span></div>
+        <div class="rate-badge">BTC <span id="rateBtc">--</span></div>
+        <div class="rate-badge">ETH <span id="rateEth">--</span></div>
+    </div>
+
+    <!-- Main View -->
+    <main class="view active" id="mainView">
+        <!-- Net Worth -->
+        <section class="net-worth">
+            <p class="net-worth-label">Net Worth</p>
+            <h2 class="net-worth-value" id="netWorthValue">$0</h2>
+            <span class="net-worth-change positive" id="netWorthChange">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                    <path d="M12 19V5M5 12l7-7 7 7"/>
+                </svg>
+                <span id="netWorthChangeText">+$0 (0%)</span>
+            </span>
+        </section>
+
+        <!-- Category Tabs -->
+        <div class="category-tabs">
+            <button class="category-tab active" data-category="all">All</button>
+            <button class="category-tab" data-category="cash">Cash</button>
+            <button class="category-tab" data-category="stock-us">US Stocks</button>
+            <button class="category-tab" data-category="stock-tw">TW Stocks</button>
+            <button class="category-tab" data-category="crypto">Crypto</button>
+        </div>
+
+        <!-- Allocation Chart -->
+        <section class="allocation-section" id="allocationSection">
+            <div class="allocation-container">
+                <div class="allocation-header">
+                    <h3 class="allocation-title">Asset Allocation</h3>
+                </div>
+                <div class="allocation-bar" id="allocationBar"></div>
+                <div class="allocation-legend" id="allocationLegend"></div>
+            </div>
+        </section>
+
+        <!-- Assets List -->
+        <section class="assets-section" id="assetsSection"></section>
+    </main>
+
+    <!-- Stats View -->
+    <section class="view stats-view" id="statsView">
+        <h2 style="font-size: 24px; font-weight: 700; margin-bottom: 20px;">Statistics</h2>
+        <div class="stat-card">
+            <p class="stat-label">Total Assets</p>
+            <p class="stat-value" id="statTotalAssets">$0</p>
+        </div>
+        <div class="stat-card">
+            <p class="stat-label">Cash Ratio</p>
+            <p class="stat-value" id="statCashRatio">0%</p>
+        </div>
+        <div class="stat-card">
+            <p class="stat-label">Investment Ratio</p>
+            <p class="stat-value" id="statInvestRatio">0%</p>
+        </div>
+        <div class="stat-card">
+            <p class="stat-label">Number of Assets</p>
+            <p class="stat-value" id="statAssetCount">0</p>
+        </div>
+    </section>
+
+    <!-- Settings View -->
+    <section class="view settings-view" id="settingsView">
+        <h2 style="font-size: 24px; font-weight: 700; margin-bottom: 20px;">Settings</h2>
+        <div class="settings-item" id="currencySettings">
+            <div class="settings-item-left">
+                <div class="settings-icon">💱</div>
+                <div>
+                    <p class="settings-label">Display Currency</p>
+                    <p class="settings-value" id="currentCurrency">TWD</p>
+                </div>
+            </div>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--text-tertiary)">
+                <path d="M9 18l6-6-6-6"/>
+            </svg>
+        </div>
+        <div class="settings-item" id="exportBtn">
+            <div class="settings-item-left">
+                <div class="settings-icon">📤</div>
+                <div>
+                    <p class="settings-label">Export Data</p>
+                    <p class="settings-value">JSON format</p>
+                </div>
+            </div>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--text-tertiary)">
+                <path d="M9 18l6-6-6-6"/>
+            </svg>
+        </div>
+        <div class="settings-item" id="importBtn">
+            <div class="settings-item-left">
+                <div class="settings-icon">📥</div>
+                <div>
+                    <p class="settings-label">Import Data</p>
+                    <p class="settings-value">From JSON file</p>
+                </div>
+            </div>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--text-tertiary)">
+                <path d="M9 18l6-6-6-6"/>
+            </svg>
+        </div>
+        <div class="settings-item" id="clearDataBtn" style="border-color: rgba(255,59,48,0.3);">
+            <div class="settings-item-left">
+                <div class="settings-icon">🗑️</div>
+                <div>
+                    <p class="settings-label" style="color: var(--accent-red);">Clear All Data</p>
+                    <p class="settings-value">This cannot be undone</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <button class="nav-item active" data-view="mainView">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+                <path d="M9 22V12h6v10"/>
+            </svg>
+            <span>Assets</span>
+        </button>
+        <button class="nav-item" data-view="statsView">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M18 20V10M12 20V4M6 20v-6"/>
+            </svg>
+            <span>Stats</span>
+        </button>
+        <button class="nav-item add-btn" id="addAssetBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M12 5v14M5 12h14"/>
+            </svg>
+            <span>Add</span>
+        </button>
+        <button class="nav-item" data-view="settingsView">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>
+            </svg>
+            <span>Settings</span>
+        </button>
+        <button class="nav-item" id="historyNavBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M12 6v6l4 2"/>
+            </svg>
+            <span>History</span>
+        </button>
+    </nav>
+
+    <!-- Modal Overlay -->
+    <div class="modal-overlay" id="modalOverlay"></div>
+
+    <!-- Add/Edit Asset Modal -->
+    <div class="modal" id="assetModal">
+        <div class="modal-handle"></div>
+        <div class="modal-header">
+            <h3 class="modal-title" id="modalTitle">Add Asset</h3>
+            <button class="modal-close" id="modalClose">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 6L6 18M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+        <form id="assetForm">
+            <div class="form-group">
+                <label class="form-label">Type</label>
+                <div class="type-selector">
+                    <div class="type-option selected" data-type="cash">
+                        <div class="type-option-icon">💵</div>
+                        <div class="type-option-label">Cash</div>
+                    </div>
+                    <div class="type-option" data-type="stock-us">
+                        <div class="type-option-icon">🇺🇸</div>
+                        <div class="type-option-label">US Stock</div>
+                    </div>
+                    <div class="type-option" data-type="stock-tw">
+                        <div class="type-option-icon">🇹🇼</div>
+                        <div class="type-option-label">TW Stock</div>
+                    </div>
+                    <div class="type-option" data-type="crypto">
+                        <div class="type-option-icon">₿</div>
+                        <div class="type-option-label">Crypto</div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Name</label>
+                <input type="text" class="form-input" id="assetName" placeholder="e.g., Savings, AAPL, BTC" required>
+            </div>
+            <div class="form-group" id="symbolGroup" style="display: none;">
+                <label class="form-label">Symbol</label>
+                <input type="text" class="form-input" id="assetSymbol" placeholder="e.g., AAPL, 2330, bitcoin">
+            </div>
+            <div class="form-group" id="sharesGroup" style="display: none;">
+                <label class="form-label">Shares / Quantity</label>
+                <input type="number" class="form-input" id="assetShares" placeholder="0" step="any">
+            </div>
+            <div class="form-group" id="costGroup" style="display: none;">
+                <label class="form-label" id="costLabel">Cost per Share (USD)</label>
+                <input type="number" class="form-input" id="assetCost" placeholder="0" step="any">
+            </div>
+            <div class="form-group" id="amountGroup">
+                <label class="form-label">Amount</label>
+                <div class="form-row">
+                    <input type="number" class="form-input" id="assetAmount" placeholder="0" step="any">
+                    <select class="form-select" id="assetCurrency">
+                        <option value="TWD">TWD</option>
+                        <option value="USD">USD</option>
+                        <option value="JPY">JPY</option>
+                        <option value="EUR">EUR</option>
+                        <option value="GBP">GBP</option>
+                        <option value="CNY">CNY</option>
+                        <option value="HKD">HKD</option>
+                    </select>
+                </div>
+            </div>
+            <input type="hidden" id="assetId">
+            <button type="submit" class="submit-btn">Save</button>
+            <button type="button" class="delete-btn" id="deleteAssetBtn" style="display: none;">Delete Asset</button>
+        </form>
+    </div>
+
+    <!-- Currency Modal -->
+    <div class="modal" id="currencyModal">
+        <div class="modal-handle"></div>
+        <div class="modal-header">
+            <h3 class="modal-title">Display Currency</h3>
+            <button class="modal-close" id="currencyModalClose">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 6L6 18M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+        <div id="currencyList">
+            <div class="settings-item currency-option" data-currency="TWD">
+                <div class="settings-item-left">
+                    <div class="settings-icon">🇹🇼</div>
+                    <p class="settings-label">TWD - New Taiwan Dollar</p>
+                </div>
+            </div>
+            <div class="settings-item currency-option" data-currency="USD">
+                <div class="settings-item-left">
+                    <div class="settings-icon">🇺🇸</div>
+                    <p class="settings-label">USD - US Dollar</p>
+                </div>
+            </div>
+            <div class="settings-item currency-option" data-currency="JPY">
+                <div class="settings-item-left">
+                    <div class="settings-icon">🇯🇵</div>
+                    <p class="settings-label">JPY - Japanese Yen</p>
+                </div>
+            </div>
+            <div class="settings-item currency-option" data-currency="EUR">
+                <div class="settings-item-left">
+                    <div class="settings-icon">🇪🇺</div>
+                    <p class="settings-label">EUR - Euro</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- History Modal -->
+    <div class="modal" id="historyModal">
+        <div class="modal-handle"></div>
+        <div class="modal-header">
+            <h3 class="modal-title">History</h3>
+            <button class="modal-close" id="historyModalClose">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 6L6 18M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+        <div id="historyList"></div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <!-- Hidden file input -->
+    <input type="file" id="importFile" accept=".json" style="display: none;">
+
+    <script>
+        // App State
+        const state = {
+            assets: [],
+            displayCurrency: 'TWD',
+            exchangeRates: {},
+            cryptoPrices: {},
+            history: [],
+            selectedCategory: 'all',
+            lastRateUpdate: null
+        };
+
+        // Currency symbols & info
+        const currencyInfo = {
+            TWD: { symbol: 'NT$', decimals: 0 },
+            USD: { symbol: '$', decimals: 2 },
+            JPY: { symbol: '¥', decimals: 0 },
+            EUR: { symbol: '€', decimals: 2 },
+            GBP: { symbol: '£', decimals: 2 },
+            CNY: { symbol: '¥', decimals: 2 },
+            HKD: { symbol: 'HK$', decimals: 2 }
+        };
+
+        // Asset native currencies
+        const assetNativeCurrency = {
+            'cash': null, // User selects
+            'stock-us': 'USD',
+            'stock-tw': 'TWD',
+            'crypto': 'USD'
+        };
+
+        // DOM Elements
+        const elements = {
+            netWorthValue: document.getElementById('netWorthValue'),
+            netWorthChange: document.getElementById('netWorthChange'),
+            netWorthChangeText: document.getElementById('netWorthChangeText'),
+            assetsSection: document.getElementById('assetsSection'),
+            allocationBar: document.getElementById('allocationBar'),
+            allocationLegend: document.getElementById('allocationLegend'),
+            allocationSection: document.getElementById('allocationSection'),
+            modalOverlay: document.getElementById('modalOverlay'),
+            assetModal: document.getElementById('assetModal'),
+            assetForm: document.getElementById('assetForm'),
+            modalTitle: document.getElementById('modalTitle'),
+            toast: document.getElementById('toast'),
+            currencyModal: document.getElementById('currencyModal'),
+            historyModal: document.getElementById('historyModal'),
+            historyList: document.getElementById('historyList'),
+            refreshBtn: document.getElementById('refreshBtn')
+        };
+
+        // Load data
+        function loadData() {
+            const saved = localStorage.getItem('wealth_tracker_data');
+            if (saved) {
+                const data = JSON.parse(saved);
+                state.assets = data.assets || [];
+                state.displayCurrency = data.displayCurrency || 'TWD';
+                state.history = data.history || [];
+                state.exchangeRates = data.exchangeRates || {};
+                state.lastRateUpdate = data.lastRateUpdate;
+            }
+            document.getElementById('currentCurrency').textContent = state.displayCurrency;
+        }
+
+        // Save data
+        function saveData() {
+            localStorage.setItem('wealth_tracker_data', JSON.stringify({
+                assets: state.assets,
+                displayCurrency: state.displayCurrency,
+                history: state.history,
+                exchangeRates: state.exchangeRates,
+                lastRateUpdate: state.lastRateUpdate
+            }));
+        }
+
+        // Format currency
+        function formatCurrency(amount, currency = state.displayCurrency) {
+            const info = currencyInfo[currency] || { symbol: '$', decimals: 2 };
+            const formatted = Math.abs(amount).toLocaleString('en-US', {
+                minimumFractionDigits: info.decimals,
+                maximumFractionDigits: info.decimals
+            });
+            return `${amount < 0 ? '-' : ''}${info.symbol}${formatted}`;
+        }
+
+        // Format compact number
+        function formatCompact(amount) {
+            if (amount >= 1000000) return `$${(amount / 1000000).toFixed(2)}M`;
+            if (amount >= 1000) return `$${(amount / 1000).toFixed(1)}K`;
+            return `$${amount.toFixed(2)}`;
+        }
+
+        // Convert amount to display currency
+        function convertToDisplayCurrency(amount, fromCurrency) {
+            if (fromCurrency === state.displayCurrency) return amount;
+            
+            // Convert to USD first (base currency for rates)
+            let amountInUsd = amount;
+            if (fromCurrency !== 'USD') {
+                const fromRate = state.exchangeRates[fromCurrency] || 1;
+                amountInUsd = amount / fromRate;
+            }
+            
+            // Convert from USD to display currency
+            if (state.displayCurrency === 'USD') return amountInUsd;
+            const toRate = state.exchangeRates[state.displayCurrency] || 1;
+            return amountInUsd * toRate;
+        }
+
+        // Get asset value in display currency
+        function getAssetValue(asset) {
+            if (asset.type === 'cash') {
+                const currency = asset.currency || 'TWD';
+                return convertToDisplayCurrency(asset.amount || 0, currency);
+            } else if (asset.type === 'stock-us') {
+                const price = state.cryptoPrices[`stock_${asset.symbol?.toUpperCase()}`] || asset.currentPrice || asset.cost || 0;
+                const shares = asset.shares || 0;
+                const valueInUsd = price * shares;
+                return convertToDisplayCurrency(valueInUsd, 'USD');
+            } else if (asset.type === 'stock-tw') {
+                const price = asset.currentPrice || asset.cost || 0;
+                const shares = asset.shares || 0;
+                const valueInTwd = price * shares;
+                return convertToDisplayCurrency(valueInTwd, 'TWD');
+            } else if (asset.type === 'crypto') {
+                const price = state.cryptoPrices[asset.symbol?.toLowerCase()] || asset.currentPrice || 0;
+                const shares = asset.shares || 0;
+                const valueInUsd = price * shares;
+                return convertToDisplayCurrency(valueInUsd, 'USD');
+            }
+            return 0;
+        }
+
+        // Get asset cost in display currency
+        function getAssetCost(asset) {
+            if (asset.type === 'cash') {
+                const currency = asset.currency || 'TWD';
+                return convertToDisplayCurrency(asset.amount || 0, currency);
+            }
+            
+            const cost = asset.cost || 0;
+            const shares = asset.shares || 0;
+            const totalCost = cost * shares;
+            
+            const nativeCurrency = assetNativeCurrency[asset.type];
+            return convertToDisplayCurrency(totalCost, nativeCurrency);
+        }
+
+        // Get original value string
+        function getOriginalValueString(asset) {
+            if (asset.type === 'cash') {
+                const currency = asset.currency || 'TWD';
+                if (currency === state.displayCurrency) return null;
+                return formatCurrency(asset.amount || 0, currency);
+            } else if (asset.type === 'stock-us') {
+                if (state.displayCurrency === 'USD') return null;
+                const price = state.cryptoPrices[`stock_${asset.symbol?.toUpperCase()}`] || asset.currentPrice || asset.cost || 0;
+                const value = price * (asset.shares || 0);
+                return formatCurrency(value, 'USD');
+            } else if (asset.type === 'stock-tw') {
+                if (state.displayCurrency === 'TWD') return null;
+                const price = asset.currentPrice || asset.cost || 0;
+                const value = price * (asset.shares || 0);
+                return formatCurrency(value, 'TWD');
+            } else if (asset.type === 'crypto') {
+                if (state.displayCurrency === 'USD') return null;
+                const price = state.cryptoPrices[asset.symbol?.toLowerCase()] || asset.currentPrice || 0;
+                const value = price * (asset.shares || 0);
+                return formatCurrency(value, 'USD');
+            }
+            return null;
+        }
+
+        // Calculate net worth
+        function calculateNetWorth() {
+            return state.assets.reduce((sum, asset) => sum + getAssetValue(asset), 0);
+        }
+
+        // Calculate category totals
+        function calculateCategoryTotals() {
+            const totals = { cash: 0, 'stock-us': 0, 'stock-tw': 0, crypto: 0 };
+            state.assets.forEach(asset => {
+                totals[asset.type] = (totals[asset.type] || 0) + getAssetValue(asset);
+            });
+            return totals;
+        }
+
+        // Fetch exchange rates
+        async function fetchExchangeRates() {
+            try {
+                const response = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
+                const data = await response.json();
+                state.exchangeRates = data.rates;
+                state.lastRateUpdate = new Date().toISOString();
+                saveData();
+                updateRateBadges();
+                return true;
+            } catch (err) {
+                console.error('Failed to fetch exchange rates:', err);
+                // Fallback rates
+                if (Object.keys(state.exchangeRates).length === 0) {
+                    state.exchangeRates = { TWD: 32, JPY: 150, EUR: 0.92, GBP: 0.79, CNY: 7.2, HKD: 7.8, USD: 1 };
+                }
+                return false;
+            }
+        }
+
+        // Fetch crypto prices
+        async function fetchCryptoPrices() {
+            const cryptoSymbols = state.assets
+                .filter(a => a.type === 'crypto' && a.symbol)
+                .map(a => a.symbol.toLowerCase());
+
+            if (cryptoSymbols.length === 0) return;
+
+            try {
+                const ids = [...new Set(cryptoSymbols)].join(',');
+                const response = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd`);
+                const data = await response.json();
+                
+                Object.keys(data).forEach(id => {
+                    state.cryptoPrices[id] = data[id].usd;
+                });
+                
+                // Update currentPrice for assets
+                state.assets.forEach(asset => {
+                    if (asset.type === 'crypto' && asset.symbol) {
+                        const price = state.cryptoPrices[asset.symbol.toLowerCase()];
+                        if (price) asset.currentPrice = price;
+                    }
+                });
+                
+                saveData();
+            } catch (err) {
+                console.error('Failed to fetch crypto prices:', err);
+            }
+        }
+
+        // Update rate badges
+        function updateRateBadges() {
+            const usdTwd = state.exchangeRates.TWD || '--';
+            document.getElementById('rateUsdTwd').textContent = typeof usdTwd === 'number' ? usdTwd.toFixed(2) : usdTwd;
+            
+            const btcPrice = state.cryptoPrices.bitcoin;
+            document.getElementById('rateBtc').textContent = btcPrice ? formatCompact(btcPrice) : '--';
+            
+            const ethPrice = state.cryptoPrices.ethereum;
+            document.getElementById('rateEth').textContent = ethPrice ? formatCompact(ethPrice) : '--';
+        }
+
+        // Fetch all prices
+        async function fetchAllPrices() {
+            elements.refreshBtn.classList.add('loading');
+            showToast('Updating prices...');
+            
+            const [ratesOk] = await Promise.all([
+                fetchExchangeRates(),
+                fetchCryptoPrices(),
+                fetchCommonCryptoPrices()
+            ]);
+            
+            elements.refreshBtn.classList.remove('loading');
+            renderAll();
+            showToast(ratesOk ? 'Prices updated' : 'Update failed, using cached data');
+        }
+
+        // Fetch common crypto for badges
+        async function fetchCommonCryptoPrices() {
+            try {
+                const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd');
+                const data = await response.json();
+                if (data.bitcoin) state.cryptoPrices.bitcoin = data.bitcoin.usd;
+                if (data.ethereum) state.cryptoPrices.ethereum = data.ethereum.usd;
+                updateRateBadges();
+            } catch (err) {
+                console.error('Failed to fetch common crypto:', err);
+            }
+        }
+
+        // Render allocation
+        function renderAllocation() {
+            const totals = calculateCategoryTotals();
+            const netWorth = calculateNetWorth();
+            
+            if (netWorth === 0) {
+                elements.allocationSection.style.display = 'none';
+                return;
+            }
+            
+            elements.allocationSection.style.display = 'block';
+            
+            const categories = [
+                { key: 'cash', label: 'Cash', class: 'cash' },
+                { key: 'stock-us', label: 'US Stocks', class: 'stock-us' },
+                { key: 'stock-tw', label: 'TW Stocks', class: 'stock-tw' },
+                { key: 'crypto', label: 'Crypto', class: 'crypto' }
+            ];
+
+            let barHTML = '';
+            let legendHTML = '';
+
+            categories.forEach(cat => {
+                const value = totals[cat.key] || 0;
+                const percent = netWorth > 0 ? (value / netWorth * 100) : 0;
+                
+                if (percent > 0) {
+                    barHTML += `<div class="allocation-segment ${cat.class}" style="width: ${percent}%"></div>`;
+                }
+                
+                legendHTML += `
+                    <div class="legend-item">
+                        <div class="legend-dot ${cat.class}"></div>
+                        <div class="legend-info">
+                            <div class="legend-label">${cat.label}</div>
+                            <div class="legend-value">${percent.toFixed(1)}%</div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            elements.allocationBar.innerHTML = barHTML || '<div class="allocation-segment cash" style="width: 100%"></div>';
+            elements.allocationLegend.innerHTML = legendHTML;
+        }
+
+        // Render assets
+        function renderAssets() {
+            const category = state.selectedCategory;
+            let filteredAssets = state.assets;
+            
+            if (category !== 'all') {
+                filteredAssets = state.assets.filter(a => a.type === category);
+            }
+
+            if (filteredAssets.length === 0) {
+                elements.assetsSection.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📊</div>
+                        <p>No assets yet<br>Tap + to add your first asset</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const grouped = {};
+            filteredAssets.forEach(asset => {
+                if (!grouped[asset.type]) grouped[asset.type] = [];
+                grouped[asset.type].push(asset);
+            });
+
+            const typeLabels = {
+                'cash': '💵 Cash',
+                'stock-us': '🇺🇸 US Stocks',
+                'stock-tw': '🇹🇼 TW Stocks',
+                'crypto': '₿ Crypto'
+            };
+
+            let html = '';
+
+            Object.keys(grouped).forEach(type => {
+                const assets = grouped[type];
+                const total = assets.reduce((sum, a) => sum + getAssetValue(a), 0);
+
+                html += `
+                    <div class="section-header">
+                        <h3 class="section-title">${typeLabels[type]}</h3>
+                        <span class="section-total">${formatCurrency(total)}</span>
+                    </div>
+                `;
+
+                assets.forEach((asset, idx) => {
+                    const value = getAssetValue(asset);
+                    const cost = getAssetCost(asset);
+                    const change = value - cost;
+                    const changePercent = cost > 0 ? (change / cost * 100) : 0;
+                    const isPositive = change >= 0;
+                    const originalValue = getOriginalValueString(asset);
+
+                    let subtitle = '';
+                    if (asset.type === 'cash') {
+                        subtitle = asset.currency || 'TWD';
+                    } else if (asset.shares) {
+                        const unit = asset.type === 'crypto' ? '' : ' shares';
+                        subtitle = `${asset.shares}${unit} · ${asset.symbol?.toUpperCase() || ''}`;
+                    }
+
+                    html += `
+                        <div class="asset-card" data-id="${asset.id}" style="animation-delay: ${idx * 0.05}s">
+                            <div class="asset-left">
+                                <div class="asset-icon ${type}">${asset.type === 'cash' ? '🏦' : asset.type === 'crypto' ? '₿' : '📈'}</div>
+                                <div class="asset-info">
+                                    <h3>${asset.name}</h3>
+                                    <p>${subtitle}</p>
+                                </div>
+                            </div>
+                            <div class="asset-right">
+                                <div class="asset-value">${formatCurrency(value)}</div>
+                                ${originalValue ? `<div class="asset-original">${originalValue}</div>` : ''}
+                                ${asset.type !== 'cash' ? `
+                                    <div class="asset-change ${isPositive ? 'positive' : 'negative'}">
+                                        ${isPositive ? '+' : ''}${changePercent.toFixed(1)}%
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    `;
+                });
+            });
+
+            elements.assetsSection.innerHTML = html;
+
+            document.querySelectorAll('.asset-card').forEach(card => {
+                card.addEventListener('click', () => editAsset(card.dataset.id));
+            });
+        }
+
+        // Render net worth
+        function renderNetWorth() {
+            const netWorth = calculateNetWorth();
+            const totalCost = state.assets.reduce((sum, a) => sum + getAssetCost(a), 0);
+            const change = netWorth - totalCost;
+            const changePercent = totalCost > 0 ? (change / totalCost * 100) : 0;
+            const isPositive = change >= 0;
+
+            elements.netWorthValue.textContent = formatCurrency(netWorth);
+            elements.netWorthChange.className = `net-worth-change ${isPositive ? 'positive' : 'negative'}`;
+            elements.netWorthChange.innerHTML = `
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                    <path d="${isPositive ? 'M12 19V5M5 12l7-7 7 7' : 'M12 5v14M5 12l7 7 7-7'}"/>
+                </svg>
+                <span>${isPositive ? '+' : ''}${formatCurrency(change)} (${changePercent >= 0 ? '+' : ''}${changePercent.toFixed(1)}%)</span>
+            `;
+        }
+
+        // Render stats
+        function renderStats() {
+            const netWorth = calculateNetWorth();
+            const totals = calculateCategoryTotals();
+            const cashRatio = netWorth > 0 ? (totals.cash / netWorth * 100) : 0;
+            const investRatio = netWorth > 0 ? ((netWorth - totals.cash) / netWorth * 100) : 0;
+
+            document.getElementById('statTotalAssets').textContent = formatCurrency(netWorth);
+            document.getElementById('statCashRatio').textContent = `${cashRatio.toFixed(1)}%`;
+            document.getElementById('statInvestRatio').textContent = `${investRatio.toFixed(1)}%`;
+            document.getElementById('statAssetCount').textContent = state.assets.length;
+        }
+
+        // Render all
+        function renderAll() {
+            renderNetWorth();
+            renderAllocation();
+            renderAssets();
+            renderStats();
+            updateRateBadges();
+        }
+
+        // Show toast
+        function showToast(message) {
+            elements.toast.textContent = message;
+            elements.toast.classList.add('active');
+            setTimeout(() => elements.toast.classList.remove('active'), 2500);
+        }
+
+        // Modal functions
+        function openModal(modal) {
+            elements.modalOverlay.classList.add('active');
+            modal.classList.add('active');
+        }
+
+        function closeModal(modal) {
+            elements.modalOverlay.classList.remove('active');
+            modal.classList.remove('active');
+        }
+
+        // Open add asset modal
+        function openAddAssetModal() {
+            elements.modalTitle.textContent = 'Add Asset';
+            elements.assetForm.reset();
+            document.getElementById('assetId').value = '';
+            document.getElementById('deleteAssetBtn').style.display = 'none';
+            
+            document.querySelectorAll('.type-option').forEach(opt => opt.classList.remove('selected'));
+            document.querySelector('.type-option[data-type="cash"]').classList.add('selected');
+            updateFormForType('cash');
+            
+            openModal(elements.assetModal);
+        }
+
+        // Edit asset
+        function editAsset(id) {
+            const asset = state.assets.find(a => a.id === id);
+            if (!asset) return;
+
+            elements.modalTitle.textContent = 'Edit Asset';
+            document.getElementById('assetId').value = asset.id;
+            document.getElementById('assetName').value = asset.name;
+            document.getElementById('assetSymbol').value = asset.symbol || '';
+            document.getElementById('assetShares').value = asset.shares || '';
+            document.getElementById('assetCost').value = asset.cost || '';
+            document.getElementById('assetAmount').value = asset.amount || '';
+            document.getElementById('assetCurrency').value = asset.currency || 'TWD';
+            document.getElementById('deleteAssetBtn').style.display = 'block';
+
+            document.querySelectorAll('.type-option').forEach(opt => {
+                opt.classList.toggle('selected', opt.dataset.type === asset.type);
+            });
+            updateFormForType(asset.type);
+
+            openModal(elements.assetModal);
+        }
+
+        // Update form for type
+        function updateFormForType(type) {
+            const symbolGroup = document.getElementById('symbolGroup');
+            const sharesGroup = document.getElementById('sharesGroup');
+            const costGroup = document.getElementById('costGroup');
+            const amountGroup = document.getElementById('amountGroup');
+            const costLabel = document.getElementById('costLabel');
+
+            if (type === 'cash') {
+                symbolGroup.style.display = 'none';
+                sharesGroup.style.display = 'none';
+                costGroup.style.display = 'none';
+                amountGroup.style.display = 'block';
+            } else {
+                symbolGroup.style.display = 'block';
+                sharesGroup.style.display = 'block';
+                costGroup.style.display = 'block';
+                amountGroup.style.display = 'none';
+                
+                if (type === 'stock-us') {
+                    document.getElementById('assetSymbol').placeholder = 'e.g., AAPL, TSLA, NVDA';
+                    costLabel.textContent = 'Cost per Share (USD)';
+                } else if (type === 'stock-tw') {
+                    document.getElementById('assetSymbol').placeholder = 'e.g., 2330, 0050';
+                    costLabel.textContent = 'Cost per Share (TWD)';
+                } else if (type === 'crypto') {
+                    document.getElementById('assetSymbol').placeholder = 'e.g., bitcoin, ethereum, solana';
+                    costLabel.textContent = 'Cost per Unit (USD)';
+                }
+            }
+        }
+
+        // Save asset
+        function saveAsset(e) {
+            e.preventDefault();
+
+            const id = document.getElementById('assetId').value;
+            const type = document.querySelector('.type-option.selected').dataset.type;
+            const name = document.getElementById('assetName').value.trim();
+            const symbol = document.getElementById('assetSymbol').value.trim();
+            const shares = parseFloat(document.getElementById('assetShares').value) || 0;
+            const cost = parseFloat(document.getElementById('assetCost').value) || 0;
+            const amount = parseFloat(document.getElementById('assetAmount').value) || 0;
+            const currency = document.getElementById('assetCurrency').value;
+
+            if (!name) {
+                showToast('Please enter a name');
+                return;
+            }
+
+            const asset = {
+                id: id || Date.now().toString(),
+                type,
+                name,
+                symbol: type !== 'cash' ? symbol : null,
+                shares: type !== 'cash' ? shares : null,
+                cost: type !== 'cash' ? cost : null,
+                currentPrice: type !== 'cash' ? cost : null,
+                amount: type === 'cash' ? amount : null,
+                currency: type === 'cash' ? currency : null,
+                updatedAt: new Date().toISOString()
+            };
+
+            if (id) {
+                const idx = state.assets.findIndex(a => a.id === id);
+                if (idx !== -1) state.assets[idx] = asset;
+            } else {
+                state.assets.push(asset);
+            }
+
+            recordHistory();
+            saveData();
+            renderAll();
+            closeModal(elements.assetModal);
+            showToast(id ? 'Asset updated' : 'Asset added');
+
+            // Fetch price for new crypto
+            if (type === 'crypto' && symbol) {
+                fetchCryptoPrices();
+            }
+        }
+
+        // Delete asset
+        function deleteAsset() {
+            const id = document.getElementById('assetId').value;
+            if (!id) return;
+
+            if (confirm('Delete this asset?')) {
+                state.assets = state.assets.filter(a => a.id !== id);
+                recordHistory();
+                saveData();
+                renderAll();
+                closeModal(elements.assetModal);
+                showToast('Asset deleted');
+            }
+        }
+
+        // Record history
+        function recordHistory() {
+            state.history.push({
+                date: new Date().toISOString(),
+                netWorth: calculateNetWorth(),
+                currency: state.displayCurrency
+            });
+            if (state.history.length > 365) {
+                state.history = state.history.slice(-365);
+            }
+        }
+
+        // Render history
+        function renderHistory() {
+            if (state.history.length === 0) {
+                elements.historyList.innerHTML = '<div class="empty-state"><p>No history yet</p></div>';
+                return;
+            }
+
+            const recent = state.history.slice(-30).reverse();
+            let html = '';
+
+            recent.forEach(record => {
+                const date = new Date(record.date);
+                html += `
+                    <div class="settings-item" style="cursor: default;">
+                        <div class="settings-item-left">
+                            <div class="settings-icon">📅</div>
+                            <div>
+                                <p class="settings-label">${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
+                                <p class="settings-value">${date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</p>
+                            </div>
+                        </div>
+                        <span style="font-family: 'JetBrains Mono', monospace; font-size: 14px;">${formatCurrency(record.netWorth, record.currency || state.displayCurrency)}</span>
+                    </div>
+                `;
+            });
+
+            elements.historyList.innerHTML = html;
+        }
+
+        // Export data
+        function exportData() {
+            const data = {
+                assets: state.assets,
+                displayCurrency: state.displayCurrency,
+                history: state.history,
+                exportedAt: new Date().toISOString()
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `wealth-backup-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('Data exported');
+        }
+
+        // Import data
+        function importData(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (data.assets) {
+                        state.assets = data.assets;
+                        state.displayCurrency = data.displayCurrency || 'TWD';
+                        state.history = data.history || [];
+                        saveData();
+                        renderAll();
+                        document.getElementById('currentCurrency').textContent = state.displayCurrency;
+                        showToast('Data imported');
+                    } else {
+                        showToast('Invalid file format');
+                    }
+                } catch (err) {
+                    showToast('Import failed');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            loadData();
+            renderAll();
+
+            // Fetch prices on load
+            await fetchAllPrices();
+
+            // Navigation
+            document.querySelectorAll('.nav-item[data-view]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const viewId = btn.dataset.view;
+                    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+                    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+                    document.getElementById(viewId).classList.add('active');
+                    btn.classList.add('active');
+                });
+            });
+
+            // Category tabs
+            document.querySelectorAll('.category-tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    state.selectedCategory = tab.dataset.category;
+                    renderAssets();
+                });
+            });
+
+            // Add button
+            document.getElementById('addAssetBtn').addEventListener('click', openAddAssetModal);
+
+            // Modal close
+            document.getElementById('modalClose').addEventListener('click', () => closeModal(elements.assetModal));
+            document.getElementById('currencyModalClose').addEventListener('click', () => closeModal(elements.currencyModal));
+            document.getElementById('historyModalClose').addEventListener('click', () => closeModal(elements.historyModal));
+            elements.modalOverlay.addEventListener('click', () => {
+                closeModal(elements.assetModal);
+                closeModal(elements.currencyModal);
+                closeModal(elements.historyModal);
+            });
+
+            // Type selector
+            document.querySelectorAll('.type-option').forEach(opt => {
+                opt.addEventListener('click', () => {
+                    document.querySelectorAll('.type-option').forEach(o => o.classList.remove('selected'));
+                    opt.classList.add('selected');
+                    updateFormForType(opt.dataset.type);
+                });
+            });
+
+            // Form
+            elements.assetForm.addEventListener('submit', saveAsset);
+            document.getElementById('deleteAssetBtn').addEventListener('click', deleteAsset);
+
+            // Refresh
+            document.getElementById('refreshBtn').addEventListener('click', fetchAllPrices);
+
+            // Currency settings
+            document.getElementById('currencySettings').addEventListener('click', () => openModal(elements.currencyModal));
+
+            // Currency selection
+            document.querySelectorAll('.currency-option').forEach(opt => {
+                opt.addEventListener('click', () => {
+                    state.displayCurrency = opt.dataset.currency;
+                    document.getElementById('currentCurrency').textContent = state.displayCurrency;
+                    saveData();
+                    renderAll();
+                    closeModal(elements.currencyModal);
+                    showToast(`Switched to ${state.displayCurrency}`);
+                });
+            });
+
+            // Export/Import
+            document.getElementById('exportBtn').addEventListener('click', exportData);
+            document.getElementById('importBtn').addEventListener('click', () => document.getElementById('importFile').click());
+            document.getElementById('importFile').addEventListener('change', (e) => {
+                if (e.target.files[0]) {
+                    importData(e.target.files[0]);
+                    e.target.value = '';
+                }
+            });
+
+            // Clear data
+            document.getElementById('clearDataBtn').addEventListener('click', () => {
+                if (confirm('Clear all data? This cannot be undone.')) {
+                    state.assets = [];
+                    state.history = [];
+                    saveData();
+                    renderAll();
+                    showToast('All data cleared');
+                }
+            });
+
+            // History
+            document.getElementById('historyNavBtn').addEventListener('click', () => {
+                renderHistory();
+                openModal(elements.historyModal);
+            });
+        });
+    </script>
+</body>
+</html>
