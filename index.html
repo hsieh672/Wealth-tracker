@@ -811,7 +811,8 @@
         <div class="rate-badge">BTC <span id="rateBtc">--</span></div>
         <div class="rate-badge">ETH <span id="rateEth">--</span></div>
         <div class="rate-badge">ADA <span id="rateAda">--</span></div>
-        <div class="rate-badge">USDT <span id="rateUsdt">--</span></div>
+        <div class="rate-badge">VOO <span id="rateVoo">--</span></div>
+        <div class="rate-badge">0050 <span id="rate0050">--</span></div>
     </div>
 
     <!-- Main View -->
@@ -1316,6 +1317,8 @@
             displayCurrency: 'TWD',
             exchangeRates: {},
             cryptoPrices: {},
+            stockPricesUS: {},
+            stockPricesTW: {},
             history: [],
             selectedCategory: 'all',
             lastRateUpdate: null
@@ -1417,6 +1420,9 @@
                 state.displayCurrency = data.displayCurrency || 'TWD';
                 state.history = data.history || [];
                 state.exchangeRates = data.exchangeRates || {};
+                state.cryptoPrices = data.cryptoPrices || {};
+                state.stockPricesUS = data.stockPricesUS || {};
+                state.stockPricesTW = data.stockPricesTW || {};
                 state.lastRateUpdate = data.lastRateUpdate;
             }
             document.getElementById('currentCurrency').textContent = state.displayCurrency;
@@ -1429,6 +1435,9 @@
                 displayCurrency: state.displayCurrency,
                 history: state.history,
                 exchangeRates: state.exchangeRates,
+                cryptoPrices: state.cryptoPrices,
+                stockPricesUS: state.stockPricesUS,
+                stockPricesTW: state.stockPricesTW,
                 lastRateUpdate: state.lastRateUpdate
             }));
         }
@@ -1473,12 +1482,14 @@
                 const currency = asset.currency || 'TWD';
                 return convertToDisplayCurrency(asset.amount || 0, currency);
             } else if (asset.type === 'stock-us') {
-                const price = state.cryptoPrices[`stock_${asset.symbol?.toUpperCase()}`] || asset.currentPrice || asset.cost || 0;
+                // Use fetched price, then currentPrice, then cost as fallback
+                const price = state.stockPricesUS[asset.symbol?.toUpperCase()] || asset.currentPrice || asset.cost || 0;
                 const shares = asset.shares || 0;
                 const valueInUsd = price * shares;
                 return convertToDisplayCurrency(valueInUsd, 'USD');
             } else if (asset.type === 'stock-tw') {
-                const price = asset.currentPrice || asset.cost || 0;
+                // Use fetched price, then currentPrice, then cost as fallback
+                const price = state.stockPricesTW[asset.symbol] || asset.currentPrice || asset.cost || 0;
                 const shares = asset.shares || 0;
                 const valueInTwd = price * shares;
                 return convertToDisplayCurrency(valueInTwd, 'TWD');
@@ -1514,12 +1525,12 @@
                 return formatCurrency(asset.amount || 0, currency);
             } else if (asset.type === 'stock-us') {
                 if (state.displayCurrency === 'USD') return null;
-                const price = state.cryptoPrices[`stock_${asset.symbol?.toUpperCase()}`] || asset.currentPrice || asset.cost || 0;
+                const price = state.stockPricesUS[asset.symbol?.toUpperCase()] || asset.currentPrice || asset.cost || 0;
                 const value = price * (asset.shares || 0);
                 return formatCurrency(value, 'USD');
             } else if (asset.type === 'stock-tw') {
                 if (state.displayCurrency === 'TWD') return null;
-                const price = asset.currentPrice || asset.cost || 0;
+                const price = state.stockPricesTW[asset.symbol] || asset.currentPrice || asset.cost || 0;
                 const value = price * (asset.shares || 0);
                 return formatCurrency(value, 'TWD');
             } else if (asset.type === 'crypto') {
@@ -1610,8 +1621,11 @@
             const adaPrice = state.cryptoPrices.cardano;
             document.getElementById('rateAda').textContent = adaPrice ? `$${adaPrice.toFixed(3)}` : '--';
             
-            const usdtPrice = state.cryptoPrices.tether;
-            document.getElementById('rateUsdt').textContent = usdtPrice ? `$${usdtPrice.toFixed(3)}` : '--';
+            const vooPrice = state.stockPricesUS['VOO'];
+            document.getElementById('rateVoo').textContent = vooPrice ? `$${vooPrice.toFixed(0)}` : '--';
+            
+            const tw0050Price = state.stockPricesTW['0050'];
+            document.getElementById('rate0050').textContent = tw0050Price ? `NT$${tw0050Price.toFixed(0)}` : '--';
         }
 
         // Fetch all prices
@@ -1619,15 +1633,31 @@
             elements.refreshBtn.classList.add('loading');
             showToast('Updating prices...');
             
-            const [ratesOk] = await Promise.all([
-                fetchExchangeRates(),
-                fetchCryptoPrices(),
-                fetchCommonCryptoPrices()
-            ]);
+            try {
+                // Fetch exchange rates first
+                await fetchExchangeRates();
+                
+                // Fetch all prices in parallel where possible
+                await Promise.all([
+                    fetchCryptoPrices(),
+                    fetchCommonCryptoPrices()
+                ]);
+                
+                // Fetch stock prices (sequential to avoid rate limiting)
+                await fetchUSStockPrices();
+                await fetchTWStockPrices();
+                await fetchCommonStockPrices();
+                
+                saveData();
+                renderAll();
+                showToast('Prices updated');
+            } catch (err) {
+                console.error('Error fetching prices:', err);
+                showToast('Some prices may not have updated');
+                renderAll();
+            }
             
             elements.refreshBtn.classList.remove('loading');
-            renderAll();
-            showToast(ratesOk ? 'Prices updated' : 'Update failed, using cached data');
         }
 
         // Fetch common crypto for badges
@@ -1643,6 +1673,71 @@
             } catch (err) {
                 console.error('Failed to fetch common crypto:', err);
             }
+        }
+
+        // Fetch stock price from Yahoo Finance via proxy
+        async function fetchYahooPrice(symbol, market = 'US') {
+            try {
+                // Add .TW suffix for Taiwan stocks
+                const yahooSymbol = market === 'TW' ? `${symbol}.TW` : symbol;
+                const proxyUrl = `https://corsproxy.io/?https://query1.finance.yahoo.com/v8/finance/chart/${yahooSymbol}?interval=1d&range=1d`;
+                
+                const response = await fetch(proxyUrl);
+                const data = await response.json();
+                
+                if (data.chart?.result?.[0]?.meta?.regularMarketPrice) {
+                    return data.chart.result[0].meta.regularMarketPrice;
+                }
+                return null;
+            } catch (err) {
+                console.error(`Failed to fetch price for ${symbol}:`, err);
+                return null;
+            }
+        }
+
+        // Fetch all US stock prices
+        async function fetchUSStockPrices() {
+            const usStocks = state.assets.filter(a => a.type === 'stock-us' && a.symbol);
+            
+            for (const asset of usStocks) {
+                const price = await fetchYahooPrice(asset.symbol, 'US');
+                if (price) {
+                    state.stockPricesUS[asset.symbol.toUpperCase()] = price;
+                    asset.currentPrice = price;
+                }
+                // Small delay to avoid rate limiting
+                await new Promise(r => setTimeout(r, 200));
+            }
+        }
+
+        // Fetch all TW stock prices
+        async function fetchTWStockPrices() {
+            const twStocks = state.assets.filter(a => a.type === 'stock-tw' && a.symbol);
+            
+            for (const asset of twStocks) {
+                const price = await fetchYahooPrice(asset.symbol, 'TW');
+                if (price) {
+                    state.stockPricesTW[asset.symbol] = price;
+                    asset.currentPrice = price;
+                }
+                // Small delay to avoid rate limiting
+                await new Promise(r => setTimeout(r, 200));
+            }
+        }
+
+        // Fetch common stocks for badges (VOO, 0050)
+        async function fetchCommonStockPrices() {
+            // Fetch VOO
+            const vooPrice = await fetchYahooPrice('VOO', 'US');
+            if (vooPrice) state.stockPricesUS['VOO'] = vooPrice;
+            
+            await new Promise(r => setTimeout(r, 200));
+            
+            // Fetch 0050
+            const tw0050Price = await fetchYahooPrice('0050', 'TW');
+            if (tw0050Price) state.stockPricesTW['0050'] = tw0050Price;
+            
+            updateRateBadges();
         }
 
         // Render allocation
@@ -1751,7 +1846,23 @@
                         const displaySymbol = asset.type === 'crypto' 
                             ? (cryptoTickers[asset.symbol?.toLowerCase()] || asset.symbol?.toUpperCase())
                             : asset.symbol?.toUpperCase();
-                        subtitle = `${asset.shares}${unit} · ${displaySymbol || ''}`;
+                        
+                        // Show current price
+                        let currentPrice = null;
+                        let priceCurrency = '';
+                        if (asset.type === 'stock-us') {
+                            currentPrice = state.stockPricesUS[asset.symbol?.toUpperCase()] || asset.currentPrice;
+                            priceCurrency = '$';
+                        } else if (asset.type === 'stock-tw') {
+                            currentPrice = state.stockPricesTW[asset.symbol] || asset.currentPrice;
+                            priceCurrency = 'NT$';
+                        } else if (asset.type === 'crypto') {
+                            currentPrice = state.cryptoPrices[asset.symbol?.toLowerCase()] || asset.currentPrice;
+                            priceCurrency = '$';
+                        }
+                        
+                        const priceStr = currentPrice ? ` @ ${priceCurrency}${currentPrice.toLocaleString()}` : '';
+                        subtitle = `${asset.shares}${unit} · ${displaySymbol || ''}${priceStr}`;
                     }
 
                     html += `
