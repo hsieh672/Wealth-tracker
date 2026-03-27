@@ -1002,7 +1002,224 @@
             </div>
             <div class="form-group" id="symbolGroup" style="display: none;">
                 <label class="form-label">Symbol</label>
-                <input type="text" class="form-input" id="assetSymbol" placeholder="e.g., AAPL, 2330, bitcoin">
+                <input type="text" class="form-input" id="assetSymbol" placeholder="e.g., AAPL, 2330">
+            </div>
+            <div class="form-group" id="stockUsSelectGroup" style="display: none;">
+                <label class="form-label">US Stock / ETF</label>
+                <select class="form-select" id="stockUsSelect">
+                    <option value="">-- Select --</option>
+                    <optgroup label="Magnificent 7">
+                        <option value="AAPL">Apple (AAPL)</option>
+                        <option value="MSFT">Microsoft (MSFT)</option>
+                        <option value="GOOGL">Alphabet (GOOGL)</option>
+                        <option value="AMZN">Amazon (AMZN)</option>
+                        <option value="NVDA">NVIDIA (NVDA)</option>
+                        <option value="META">Meta (META)</option>
+                        <option value="TSLA">Tesla (TSLA)</option>
+                    </optgroup>
+                    <optgroup label="Popular ETFs">
+                        <option value="VOO">Vanguard S&P 500 (VOO)</option>
+                        <option value="VTI">Vanguard Total Stock (VTI)</option>
+                        <option value="VXUS">Vanguard Intl Stock (VXUS)</option>
+                        <option value="QQQ">Invesco QQQ (QQQ)</option>
+                        <option value="SPY">SPDR S&P 500 (SPY)</option>
+                        <option value="IVV">iShares S&P 500 (IVV)</option>
+                        <option value="VEA">Vanguard FTSE Developed (VEA)</option>
+                        <option value="VWO">Vanguard Emerging Markets (VWO)</option>
+                        <option value="BND">Vanguard Total Bond (BND)</option>
+                        <option value="ARKK">ARK Innovation (ARKK)</option>
+                        <option value="SCHD">Schwab US Dividend (SCHD)</option>
+                        <option value="VIG">Vanguard Dividend Appreciation (VIG)</option>
+                    </optgroup>
+                    <optgroup label="Tech">
+                        <option value="AMD">AMD (AMD)</option>
+                        <option value="INTC">Intel (INTC)</option>
+                        <option value="CRM">Salesforce (CRM)</option>
+                        <option value="ORCL">Oracle (ORCL)</option>
+                        <option value="ADBE">Adobe (ADBE)</option>
+                        <option value="NFLX">Netflix (NFLX)</option>
+                        <option value="AVGO">Broadcom (AVGO)</option>
+                        <option value="QCOM">Qualcomm (QCOM)</option>
+                        <option value="TSM">TSMC ADR (TSM)</option>
+                        <option value="ASML">ASML (ASML)</option>
+                        <option value="MU">Micron (MU)</option>
+                        <option value="SNOW">Snowflake (SNOW)</option>
+                        <option value="PLTR">Palantir (PLTR)</option>
+                        <option value="UBER">Uber (UBER)</option>
+                        <option value="SHOP">Shopify (SHOP)</option>
+                        <option value="SQ">Block (SQ)</option>
+                        <option value="COIN">Coinbase (COIN)</option>
+                    </optgroup>
+                    <optgroup label="Finance">
+                        <option value="BRK.B">Berkshire Hathaway (BRK.B)</option>
+                        <option value="JPM">JPMorgan (JPM)</option>
+                        <option value="V">Visa (V)</option>
+                        <option value="MA">Mastercard (MA)</option>
+                        <option value="BAC">Bank of America (BAC)</option>
+                        <option value="GS">Goldman Sachs (GS)</option>
+                    </optgroup>
+                    <optgroup label="Healthcare">
+                        <option value="UNH">UnitedHealth (UNH)</option>
+                        <option value="JNJ">Johnson & Johnson (JNJ)</option>
+                        <option value="LLY">Eli Lilly (LLY)</option>
+                        <option value="PFE">Pfizer (PFE)</option>
+                        <option value="ABBV">AbbVie (ABBV)</option>
+                        <option value="MRK">Merck (MRK)</option>
+                    </optgroup>
+                    <optgroup label="Consumer">
+                        <option value="WMT">Walmart (WMT)</option>
+                        <option value="COST">Costco (COST)</option>
+                        <option value="HD">Home Depot (HD)</option>
+                        <option value="MCD">McDonald's (MCD)</option>
+                        <option value="SBUX">Starbucks (SBUX)</option>
+                        <option value="NKE">Nike (NKE)</option>
+                        <option value="DIS">Disney (DIS)</option>
+                        <option value="KO">Coca-Cola (KO)</option>
+                        <option value="PEP">PepsiCo (PEP)</option>
+                        <option value="PG">Procter & Gamble (PG)</option>
+                    </optgroup>
+                    <optgroup label="Energy & Industrial">
+                        <option value="XOM">Exxon Mobil (XOM)</option>
+                        <option value="CVX">Chevron (CVX)</option>
+                        <option value="CAT">Caterpillar (CAT)</option>
+                        <option value="BA">Boeing (BA)</option>
+                        <option value="UPS">UPS (UPS)</option>
+                        <option value="HON">Honeywell (HON)</option>
+                    </optgroup>
+                    <option value="_custom">-- Enter manually --</option>
+                </select>
+                <input type="text" class="form-input" id="stockUsCustom" placeholder="Enter symbol (e.g., AAPL)" style="display: none; margin-top: 10px;">
+            </div>
+            <div class="form-group" id="stockTwSelectGroup" style="display: none;">
+                <label class="form-label">TW Stock / ETF</label>
+                <select class="form-select" id="stockTwSelect">
+                    <option value="">-- Select --</option>
+                    <optgroup label="Popular ETFs">
+                        <option value="0050">元大台灣50 (0050)</option>
+                        <option value="0056">元大高股息 (0056)</option>
+                        <option value="006208">富邦台50 (006208)</option>
+                        <option value="00878">國泰永續高股息 (00878)</option>
+                        <option value="00919">群益台灣精選高息 (00919)</option>
+                        <option value="00929">復華台灣科技優息 (00929)</option>
+                        <option value="00940">元大台灣價值高息 (00940)</option>
+                        <option value="00713">元大台灣高息低波 (00713)</option>
+                        <option value="00881">國泰台灣5G+ (00881)</option>
+                        <option value="00830">國泰費城半導體 (00830)</option>
+                        <option value="00757">統一FANG+ (00757)</option>
+                        <option value="00662">富邦NASDAQ (00662)</option>
+                    </optgroup>
+                    <optgroup label="Semiconductor">
+                        <option value="2330">台積電 (2330)</option>
+                        <option value="2454">聯發科 (2454)</option>
+                        <option value="2303">聯電 (2303)</option>
+                        <option value="3711">日月光投控 (3711)</option>
+                        <option value="2379">瑞昱 (2379)</option>
+                        <option value="3034">聯詠 (3034)</option>
+                        <option value="2408">南亞科 (2408)</option>
+                        <option value="3443">創意 (3443)</option>
+                        <option value="6669">緯穎 (6669)</option>
+                        <option value="2382">廣達 (2382)</option>
+                    </optgroup>
+                    <optgroup label="Tech & Electronics">
+                        <option value="2317">鴻海 (2317)</option>
+                        <option value="2308">台達電 (2308)</option>
+                        <option value="2354">鴻準 (2354)</option>
+                        <option value="2301">光寶科 (2301)</option>
+                        <option value="2357">華碩 (2357)</option>
+                        <option value="2395">研華 (2395)</option>
+                        <option value="3231">緯創 (3231)</option>
+                        <option value="2313">華通 (2313)</option>
+                        <option value="3037">欣興 (3037)</option>
+                        <option value="2345">智邦 (2345)</option>
+                        <option value="4904">遠傳 (4904)</option>
+                        <option value="2412">中華電 (2412)</option>
+                    </optgroup>
+                    <optgroup label="Finance">
+                        <option value="2882">國泰金 (2882)</option>
+                        <option value="2881">富邦金 (2881)</option>
+                        <option value="2884">玉山金 (2884)</option>
+                        <option value="2886">兆豐金 (2886)</option>
+                        <option value="2891">中信金 (2891)</option>
+                        <option value="2883">開發金 (2883)</option>
+                        <option value="2892">第一金 (2892)</option>
+                        <option value="2880">華南金 (2880)</option>
+                        <option value="5880">合庫金 (5880)</option>
+                    </optgroup>
+                    <optgroup label="Traditional Industry">
+                        <option value="1301">台塑 (1301)</option>
+                        <option value="1303">南亞 (1303)</option>
+                        <option value="1326">台化 (1326)</option>
+                        <option value="2002">中鋼 (2002)</option>
+                        <option value="2912">統一超 (2912)</option>
+                        <option value="1216">統一 (1216)</option>
+                        <option value="2207">和泰車 (2207)</option>
+                        <option value="1101">台泥 (1101)</option>
+                        <option value="2603">長榮 (2603)</option>
+                        <option value="2609">陽明 (2609)</option>
+                    </optgroup>
+                    <option value="_custom">-- Enter manually --</option>
+                </select>
+                <input type="text" class="form-input" id="stockTwCustom" placeholder="Enter symbol (e.g., 2330)" style="display: none; margin-top: 10px;">
+            </div>
+            <div class="form-group" id="cryptoSelectGroup" style="display: none;">
+                <label class="form-label">Cryptocurrency</label>
+                <select class="form-select" id="cryptoSelect">
+                    <option value="">-- Select --</option>
+                    <optgroup label="Top Coins">
+                        <option value="bitcoin">Bitcoin (BTC)</option>
+                        <option value="ethereum">Ethereum (ETH)</option>
+                        <option value="tether">Tether (USDT)</option>
+                        <option value="binancecoin">BNB (BNB)</option>
+                        <option value="solana">Solana (SOL)</option>
+                        <option value="ripple">XRP (XRP)</option>
+                        <option value="usd-coin">USD Coin (USDC)</option>
+                        <option value="cardano">Cardano (ADA)</option>
+                        <option value="avalanche-2">Avalanche (AVAX)</option>
+                        <option value="dogecoin">Dogecoin (DOGE)</option>
+                    </optgroup>
+                    <optgroup label="DeFi">
+                        <option value="chainlink">Chainlink (LINK)</option>
+                        <option value="uniswap">Uniswap (UNI)</option>
+                        <option value="aave">Aave (AAVE)</option>
+                        <option value="maker">Maker (MKR)</option>
+                        <option value="compound-governance-token">Compound (COMP)</option>
+                        <option value="curve-dao-token">Curve (CRV)</option>
+                        <option value="lido-dao">Lido DAO (LDO)</option>
+                        <option value="the-graph">The Graph (GRT)</option>
+                    </optgroup>
+                    <optgroup label="Layer 2 / Scaling">
+                        <option value="matic-network">Polygon (MATIC)</option>
+                        <option value="arbitrum">Arbitrum (ARB)</option>
+                        <option value="optimism">Optimism (OP)</option>
+                        <option value="immutable-x">Immutable X (IMX)</option>
+                    </optgroup>
+                    <optgroup label="Other Popular">
+                        <option value="polkadot">Polkadot (DOT)</option>
+                        <option value="tron">TRON (TRX)</option>
+                        <option value="shiba-inu">Shiba Inu (SHIB)</option>
+                        <option value="litecoin">Litecoin (LTC)</option>
+                        <option value="bitcoin-cash">Bitcoin Cash (BCH)</option>
+                        <option value="stellar">Stellar (XLM)</option>
+                        <option value="cosmos">Cosmos (ATOM)</option>
+                        <option value="monero">Monero (XMR)</option>
+                        <option value="ethereum-classic">Ethereum Classic (ETC)</option>
+                        <option value="filecoin">Filecoin (FIL)</option>
+                        <option value="aptos">Aptos (APT)</option>
+                        <option value="sui">Sui (SUI)</option>
+                        <option value="near">NEAR Protocol (NEAR)</option>
+                        <option value="internet-computer">Internet Computer (ICP)</option>
+                        <option value="render-token">Render (RNDR)</option>
+                        <option value="injective-protocol">Injective (INJ)</option>
+                        <option value="fetch-ai">Fetch.ai (FET)</option>
+                        <option value="pepe">Pepe (PEPE)</option>
+                    </optgroup>
+                    <optgroup label="Stablecoins">
+                        <option value="dai">Dai (DAI)</option>
+                        <option value="frax">Frax (FRAX)</option>
+                        <option value="true-usd">TrueUSD (TUSD)</option>
+                        <option value="paxos-standard">Pax Dollar (USDP)</option>
+                    </optgroup>
+                </select>
             </div>
             <div class="form-group" id="sharesGroup" style="display: none;">
                 <label class="form-label">Shares / Quantity</label>
@@ -1102,6 +1319,54 @@
             history: [],
             selectedCategory: 'all',
             lastRateUpdate: null
+        };
+
+        // Crypto ID to ticker mapping
+        const cryptoTickers = {
+            'bitcoin': 'BTC',
+            'ethereum': 'ETH',
+            'tether': 'USDT',
+            'binancecoin': 'BNB',
+            'solana': 'SOL',
+            'ripple': 'XRP',
+            'usd-coin': 'USDC',
+            'cardano': 'ADA',
+            'avalanche-2': 'AVAX',
+            'dogecoin': 'DOGE',
+            'chainlink': 'LINK',
+            'uniswap': 'UNI',
+            'aave': 'AAVE',
+            'maker': 'MKR',
+            'compound-governance-token': 'COMP',
+            'curve-dao-token': 'CRV',
+            'lido-dao': 'LDO',
+            'the-graph': 'GRT',
+            'matic-network': 'MATIC',
+            'arbitrum': 'ARB',
+            'optimism': 'OP',
+            'immutable-x': 'IMX',
+            'polkadot': 'DOT',
+            'tron': 'TRX',
+            'shiba-inu': 'SHIB',
+            'litecoin': 'LTC',
+            'bitcoin-cash': 'BCH',
+            'stellar': 'XLM',
+            'cosmos': 'ATOM',
+            'monero': 'XMR',
+            'ethereum-classic': 'ETC',
+            'filecoin': 'FIL',
+            'aptos': 'APT',
+            'sui': 'SUI',
+            'near': 'NEAR',
+            'internet-computer': 'ICP',
+            'render-token': 'RNDR',
+            'injective-protocol': 'INJ',
+            'fetch-ai': 'FET',
+            'pepe': 'PEPE',
+            'dai': 'DAI',
+            'frax': 'FRAX',
+            'true-usd': 'TUSD',
+            'paxos-standard': 'USDP'
         };
 
         // Currency symbols & info
@@ -1483,7 +1748,10 @@
                         subtitle = asset.currency || 'TWD';
                     } else if (asset.shares) {
                         const unit = asset.type === 'crypto' ? '' : ' shares';
-                        subtitle = `${asset.shares}${unit} · ${asset.symbol?.toUpperCase() || ''}`;
+                        const displaySymbol = asset.type === 'crypto' 
+                            ? (cryptoTickers[asset.symbol?.toLowerCase()] || asset.symbol?.toUpperCase())
+                            : asset.symbol?.toUpperCase();
+                        subtitle = `${asset.shares}${unit} · ${displaySymbol || ''}`;
                     }
 
                     html += `
@@ -1579,6 +1847,13 @@
             elements.modalTitle.textContent = 'Add Asset';
             elements.assetForm.reset();
             document.getElementById('assetId').value = '';
+            document.getElementById('cryptoSelect').value = '';
+            document.getElementById('stockUsSelect').value = '';
+            document.getElementById('stockTwSelect').value = '';
+            document.getElementById('stockUsCustom').value = '';
+            document.getElementById('stockTwCustom').value = '';
+            document.getElementById('stockUsCustom').style.display = 'none';
+            document.getElementById('stockTwCustom').style.display = 'none';
             document.getElementById('deleteAssetBtn').style.display = 'none';
             
             document.querySelectorAll('.type-option').forEach(opt => opt.classList.remove('selected'));
@@ -1597,11 +1872,37 @@
             document.getElementById('assetId').value = asset.id;
             document.getElementById('assetName').value = asset.name;
             document.getElementById('assetSymbol').value = asset.symbol || '';
+            document.getElementById('cryptoSelect').value = asset.symbol || '';
             document.getElementById('assetShares').value = asset.shares || '';
             document.getElementById('assetCost').value = asset.cost || '';
             document.getElementById('assetAmount').value = asset.amount || '';
             document.getElementById('assetCurrency').value = asset.currency || 'TWD';
             document.getElementById('deleteAssetBtn').style.display = 'block';
+
+            // Set stock dropdowns
+            if (asset.type === 'stock-us') {
+                const select = document.getElementById('stockUsSelect');
+                const customInput = document.getElementById('stockUsCustom');
+                if ([...select.options].some(o => o.value === asset.symbol)) {
+                    select.value = asset.symbol;
+                    customInput.style.display = 'none';
+                } else {
+                    select.value = '_custom';
+                    customInput.value = asset.symbol || '';
+                    customInput.style.display = 'block';
+                }
+            } else if (asset.type === 'stock-tw') {
+                const select = document.getElementById('stockTwSelect');
+                const customInput = document.getElementById('stockTwCustom');
+                if ([...select.options].some(o => o.value === asset.symbol)) {
+                    select.value = asset.symbol;
+                    customInput.style.display = 'none';
+                } else {
+                    select.value = '_custom';
+                    customInput.value = asset.symbol || '';
+                    customInput.style.display = 'block';
+                }
+            }
 
             document.querySelectorAll('.type-option').forEach(opt => {
                 opt.classList.toggle('selected', opt.dataset.type === asset.type);
@@ -1614,32 +1915,42 @@
         // Update form for type
         function updateFormForType(type) {
             const symbolGroup = document.getElementById('symbolGroup');
+            const cryptoSelectGroup = document.getElementById('cryptoSelectGroup');
+            const stockUsSelectGroup = document.getElementById('stockUsSelectGroup');
+            const stockTwSelectGroup = document.getElementById('stockTwSelectGroup');
             const sharesGroup = document.getElementById('sharesGroup');
             const costGroup = document.getElementById('costGroup');
             const amountGroup = document.getElementById('amountGroup');
             const costLabel = document.getElementById('costLabel');
 
+            // Hide all symbol inputs first
+            symbolGroup.style.display = 'none';
+            cryptoSelectGroup.style.display = 'none';
+            stockUsSelectGroup.style.display = 'none';
+            stockTwSelectGroup.style.display = 'none';
+
             if (type === 'cash') {
-                symbolGroup.style.display = 'none';
                 sharesGroup.style.display = 'none';
                 costGroup.style.display = 'none';
                 amountGroup.style.display = 'block';
-            } else {
-                symbolGroup.style.display = 'block';
+            } else if (type === 'crypto') {
+                cryptoSelectGroup.style.display = 'block';
                 sharesGroup.style.display = 'block';
                 costGroup.style.display = 'block';
                 amountGroup.style.display = 'none';
-                
-                if (type === 'stock-us') {
-                    document.getElementById('assetSymbol').placeholder = 'e.g., AAPL, TSLA, NVDA';
-                    costLabel.textContent = 'Cost per Share (USD)';
-                } else if (type === 'stock-tw') {
-                    document.getElementById('assetSymbol').placeholder = 'e.g., 2330, 0050';
-                    costLabel.textContent = 'Cost per Share (TWD)';
-                } else if (type === 'crypto') {
-                    document.getElementById('assetSymbol').placeholder = 'e.g., bitcoin, ethereum, solana';
-                    costLabel.textContent = 'Cost per Unit (USD)';
-                }
+                costLabel.textContent = 'Cost per Unit (USD)';
+            } else if (type === 'stock-us') {
+                stockUsSelectGroup.style.display = 'block';
+                sharesGroup.style.display = 'block';
+                costGroup.style.display = 'block';
+                amountGroup.style.display = 'none';
+                costLabel.textContent = 'Cost per Share (USD)';
+            } else if (type === 'stock-tw') {
+                stockTwSelectGroup.style.display = 'block';
+                sharesGroup.style.display = 'block';
+                costGroup.style.display = 'block';
+                amountGroup.style.display = 'none';
+                costLabel.textContent = 'Cost per Share (TWD)';
             }
         }
 
@@ -1650,7 +1961,23 @@
             const id = document.getElementById('assetId').value;
             const type = document.querySelector('.type-option.selected').dataset.type;
             const name = document.getElementById('assetName').value.trim();
-            const symbol = document.getElementById('assetSymbol').value.trim();
+            
+            // Get symbol based on type
+            let symbol = '';
+            if (type === 'crypto') {
+                symbol = document.getElementById('cryptoSelect').value;
+            } else if (type === 'stock-us') {
+                const selectVal = document.getElementById('stockUsSelect').value;
+                symbol = selectVal === '_custom' 
+                    ? document.getElementById('stockUsCustom').value.trim().toUpperCase()
+                    : selectVal;
+            } else if (type === 'stock-tw') {
+                const selectVal = document.getElementById('stockTwSelect').value;
+                symbol = selectVal === '_custom'
+                    ? document.getElementById('stockTwCustom').value.trim()
+                    : selectVal;
+            }
+            
             const shares = parseFloat(document.getElementById('assetShares').value) || 0;
             const cost = parseFloat(document.getElementById('assetCost').value) || 0;
             const amount = parseFloat(document.getElementById('assetAmount').value) || 0;
@@ -1658,6 +1985,16 @@
 
             if (!name) {
                 showToast('Please enter a name');
+                return;
+            }
+
+            if (type === 'crypto' && !symbol) {
+                showToast('Please select a cryptocurrency');
+                return;
+            }
+
+            if ((type === 'stock-us' || type === 'stock-tw') && !symbol) {
+                showToast('Please select or enter a stock symbol');
                 return;
             }
 
@@ -1846,6 +2183,19 @@
             // Form
             elements.assetForm.addEventListener('submit', saveAsset);
             document.getElementById('deleteAssetBtn').addEventListener('click', deleteAsset);
+
+            // Stock dropdown custom input toggle
+            document.getElementById('stockUsSelect').addEventListener('change', (e) => {
+                const customInput = document.getElementById('stockUsCustom');
+                customInput.style.display = e.target.value === '_custom' ? 'block' : 'none';
+                if (e.target.value === '_custom') customInput.focus();
+            });
+
+            document.getElementById('stockTwSelect').addEventListener('change', (e) => {
+                const customInput = document.getElementById('stockTwCustom');
+                customInput.style.display = e.target.value === '_custom' ? 'block' : 'none';
+                if (e.target.value === '_custom') customInput.focus();
+            });
 
             // Refresh
             document.getElementById('refreshBtn').addEventListener('click', fetchAllPrices);
